@@ -1,0 +1,127 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>TKN</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <script src="scripts/winstore-jscompat.js"></script>
+    <link href="css/leaflet.css" rel="stylesheet" />
+    <script src="scripts/leaflet.js"></script>
+    <script src="scripts/jquery-1.12.1.min.js"></script>
+
+    <style>
+        html, body {
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    
+    <link href="css/index.css" rel="stylesheet" />
+</head>
+<body>
+    <div id="map"></div>
+    <script>
+
+    // Layer defs
+    var opentopo = L.tileLayer(
+         'http://s.map5.nl/map/gast/tiles/opentopo/EPSG900913/{z}/{x}/{y}.jpeg', {
+        // tms: true,
+        maxZoom: 18,
+        continuousWorld: true,
+        detectRetina: false,
+        attribution: 'CC by CA <a href="http://www.opentopo.nl">OpenTopo</a> - <a href=http://openstreetmap.org>OpenStreetMap</a>'
+    });
+
+    var openlufo = L.tileLayer(
+        'http://s.map5.nl/map/gast/tiles/openlufo/EPSG900913/{z}/{x}/{y}.jpeg', {
+            // tms: true,
+            maxZoom: 18,
+            continuousWorld: true,
+            detectRetina: false,
+            attribution: 'CC by CA <a href="http://www.opensimpletopo.nl">OpenSimpleTopo</a> - <a href=http://openstreetmap.org>OpenStreetMap</a>'
+        });
+
+    var OSM_recreatie_point = L.tileLayer.wms("http://localhost:8080/geoserver/wms", {
+        layers: 'OSM_recreatie_point',
+        format: 'image/png',
+        transparent: true,
+        minZoom: 11,
+        version: '1.1.0',
+        attribution: "OSM and Pim Verver"
+    });
+
+    //var osm_historic_polygon_view = L.tileLayer.wms("http://localhost:8080/geoserver/wms", {
+    //    layers: 'osm_historic_polygon_view',
+    //    format: 'image/png',
+    //    transparent: true,
+    //    minZoom: 11,
+    //    version: '1.1.0',
+    //    attribution: "OSM and Pim Verver"
+    //});
+
+    var osm_historic_polygon_viewgl = new L.GeoJSON();
+
+    function loadGeoJson(data) {
+        geojsonLayer.addGeoJSON(data, {
+            pointToLayer: function (latlng) {
+                return new L.CircleMarker(latlng, {
+                    radius: 8,
+                    fillColor: "#fecb00",
+                    color: "#fecb00",
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.9,
+                });
+            }
+
+        });
+    }
+    var geoJsonUrl = "http://localhost:8080/geoserver/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=osm_historic_polygon_view&srsName=EPSG:900913&outputFormat=json&format_options=callback:loadGeoJson";
+    $.ajax({
+        url: geoJsonUrl,
+        dataType: 'jsonp'
+    });
+    
+    // grouping the layers
+    var baseLayers = {
+
+        "OpenTopo (NL)": opentopo,
+        "Open luchtfoto": openlufo
+    };
+
+    var overlayLayers = {     
+        "OSM Polygon Historic View": osm_historic_polygon_viewgl,
+        "OSM Recreatie Point": OSM_recreatie_point
+    };
+
+    // Create the map
+    var map = L.map('map', {
+        center: new L.LatLng(52.312, 5.1),
+        zoom: 9,
+        layers: [opentopo]
+    });
+
+
+
+    L.control.layers(baseLayers, overlayLayers).addTo(map);
+    //var selCtrl = L.control.selectLayers(baseLayers, overlayLayers).addTo(map);
+
+   
+   // map.addLayer(geojsonLayer);
+
+    </script>
+
+    <!-- Cordova reference, this is added to your app when it's built. -->
+    <script src="cordova.js"></script>
+    <script src="scripts/platformOverrides.js"></script>
+    <script src="scripts/index.js"></script>
+</body>
+</html>
