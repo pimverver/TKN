@@ -49,17 +49,8 @@
             attribution: 'CC by CA <a href="http://www.opensimpletopo.nl">OpenSimpleTopo</a> - <a href=http://openstreetmap.org>OpenStreetMap</a>'
         });
 
-    var OSM_recreatie_point = L.tileLayer.wms("http://localhost:8080/geoserver/wms", {
-        layers: 'OSM_recreatie_point',
-        format: 'image/png',
-        transparent: true,
-        minZoom: 11,
-        version: '1.1.0',
-        attribution: "OSM and Pim Verver"
-    });
-
-    //var osm_historic_polygon_view = L.tileLayer.wms("http://localhost:8080/geoserver/wms", {
-    //    layers: 'osm_historic_polygon_view',
+    //var OSM_recreatie_point = L.tileLayer.wms("http://localhost:8080/geoserver/wms", {
+    //    layers: 'OSM_recreatie_point',
     //    format: 'image/png',
     //    transparent: true,
     //    minZoom: 11,
@@ -67,10 +58,19 @@
     //    attribution: "OSM and Pim Verver"
     //});
 
-    var osm_historic_polygon_viewgl = new L.GeoJSON();
+    var osm_historic_polygon_view = L.tileLayer.wms("http://localhost:8080/geoserver/wms", {
+        layers: 'osm_historic_polygon_view',
+        format: 'image/png',
+        transparent: true,
+        minZoom: 11,
+        version: '1.1.0',
+        attribution: "OSM and Pim Verver"
+    });
 
+    var OSM_recreatie_pointgl = new L.GeoJSON();
+    OSM_recreatie_pointgl.
     function loadGeoJson(data) {
-        geojsonLayer.addGeoJSON(data, {
+        OSM_recreatie_pointgl.addGeoJSON(data, {
             pointToLayer: function (latlng) {
                 return new L.CircleMarker(latlng, {
                     radius: 8,
@@ -84,10 +84,12 @@
 
         });
     }
-    var geoJsonUrl = "http://localhost:8080/geoserver/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=osm_historic_polygon_view&srsName=EPSG:900913&outputFormat=json&format_options=callback:loadGeoJson";
+    var geoJsonUrl = "http://localhost:8080/geoserver/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=OSM_recreatie_point&srsName=EPSG:900913&outputFormat=json&format_options=callback:loadGeoJson";
+
     $.ajax({
         url: geoJsonUrl,
-        dataType: 'jsonp'
+        dataType: 'json',
+        success: loadGeoJson
     });
     
     // grouping the layers
@@ -98,8 +100,8 @@
     };
 
     var overlayLayers = {     
-        "OSM Polygon Historic View": osm_historic_polygon_viewgl,
-        "OSM Recreatie Point": OSM_recreatie_point
+        "OSM Polygon Historic View": osm_historic_polygon_view,
+        "OSM Recreatie Point": OSM_recreatie_pointgl
     };
 
     // Create the map
